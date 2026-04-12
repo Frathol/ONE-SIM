@@ -1,0 +1,28 @@
+Detailed Message Stats by Prefix
+sim_time: 43200.0000
+
+--- Statistics for Prefix: [GEN_AUTO] ---
+created       : 54
+started       : 50382
+relayed       : 50190
+aborted       : 190
+dropped       : 0
+delivered     : 50
+delivery_prob : 0.9259
+overhead_ratio: 1002.8000
+latency_avg   : 2812.5800
+hopcount_avg  : 7.7400
+buffertime_avg: NaN
+
+--- Statistics for Prefix: [M] ---
+created       : 40
+started       : 37178
+relayed       : 36510
+aborted       : 664
+dropped       : 0
+delivered     : 37
+delivery_prob : 0.9250
+overhead_ratio: 985.7568
+latency_avg   : 2746.5432
+hopcount_avg  : 7.7568
+buffertime_avg: NaN

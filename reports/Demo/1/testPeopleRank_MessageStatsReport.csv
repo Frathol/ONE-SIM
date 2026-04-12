@@ -1,0 +1,20 @@
+Message stats for scenario testPeopleRank
+sim_time: 700000.0000
+created: 23720
+started: 51534
+relayed: 32854
+aborted: 18680
+dropped: 54858
+removed: 0
+delivered: 209
+delivery_prob: 0.0088
+response_prob: 0.0000
+overhead_ratio: 156.1962
+latency_avg: 27969.5072
+latency_med: 21470.0000
+hopcount_avg: 1.6124
+hopcount_med: 1
+buffertime_avg: 18191.6756
+buffertime_med: 15092.0000
+rtt_avg: NaN
+rtt_med: NaN

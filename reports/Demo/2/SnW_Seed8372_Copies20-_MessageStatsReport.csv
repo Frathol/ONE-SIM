@@ -1,0 +1,20 @@
+Message stats for scenario SnW_Seed8372_Copies20-
+sim_time: 700000.0000
+created: 23720
+started: 34021
+relayed: 16508
+aborted: 17513
+dropped: 39434
+removed: 0
+delivered: 74
+delivery_prob: 0.0031
+response_prob: 0.0000
+overhead_ratio: 222.0811
+latency_avg: 7727.6216
+latency_med: 7122.0000
+hopcount_avg: 1.3784
+hopcount_med: 1
+buffertime_avg: 13634.3850
+buffertime_med: 16695.0000
+rtt_avg: NaN
+rtt_med: NaN

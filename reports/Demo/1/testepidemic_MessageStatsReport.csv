@@ -1,0 +1,20 @@
+Message stats for scenario testepidemic
+sim_time: 700000.0000
+created: 23721
+started: 136578
+relayed: 119866
+aborted: 16711
+dropped: 121898
+removed: 0
+delivered: 9950
+delivery_prob: 0.4195
+response_prob: 0.0000
+overhead_ratio: 11.0468
+latency_avg: 37619.0687
+latency_med: 35379.0000
+hopcount_avg: 2.4006
+hopcount_med: 2
+buffertime_avg: 57884.5421
+buffertime_med: 65102.0000
+rtt_avg: NaN
+rtt_med: NaN

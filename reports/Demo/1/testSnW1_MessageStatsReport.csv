@@ -1,0 +1,20 @@
+Message stats for scenario testSnW1
+sim_time: 700000.0000
+created: 23721
+started: 16814
+relayed: 7849
+aborted: 8965
+dropped: 30754
+removed: 0
+delivered: 211
+delivery_prob: 0.0089
+response_prob: 0.0000
+overhead_ratio: 36.1991
+latency_avg: 8707.0900
+latency_med: 8849.0000
+hopcount_avg: 1.1185
+hopcount_med: 1
+buffertime_avg: 13685.3112
+buffertime_med: 15597.0000
+rtt_avg: NaN
+rtt_med: NaN

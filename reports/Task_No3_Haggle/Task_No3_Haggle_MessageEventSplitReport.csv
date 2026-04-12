@@ -1,0 +1,15 @@
+Detailed Message Stats by Prefix
+sim_time: 43200.0000
+
+--- Statistics for Prefix: [HAG_MSG] ---
+created       : 215
+started       : 8601
+relayed       : 8600
+aborted       : 1
+dropped       : 0
+delivered     : 215
+delivery_prob : 1.0000
+overhead_ratio: 39.0000
+latency_avg   : 1.6047
+hopcount_avg  : 1.0000
+buffertime_avg: NaN

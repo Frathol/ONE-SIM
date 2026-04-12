@@ -1,0 +1,20 @@
+Message stats for scenario PeopleRank-WithDampingFactor-0.3
+sim_time: 43200.0000
+created: 1429
+started: 29588
+relayed: 25557
+aborted: 4029
+dropped: 24210
+removed: 0
+delivered: 329
+delivery_prob: 0.2302
+response_prob: 0.0000
+overhead_ratio: 76.6809
+latency_avg: 12319.9574
+latency_med: 10337.0000
+hopcount_avg: 2.0851
+hopcount_med: 1
+buffertime_avg: 924.5284
+buffertime_med: 251.0000
+rtt_avg: NaN
+rtt_med: NaN
