@@ -3,7 +3,7 @@
 .idea
 
 /target
-#/reports
+/reports
 # Ignore Gradle project-specific cache directory
 .gradle
 
