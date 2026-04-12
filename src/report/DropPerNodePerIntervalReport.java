@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import core.DTNHost;
-import core.SimScenario;
+// import core.SimScenario;
 import core.Message;
 import core.MessageListener;
 import core.SimClock;
