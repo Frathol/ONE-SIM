@@ -42,7 +42,7 @@ public class ContactAndMessageReport extends Report implements MessageListener, 
 
     @Override
     public void done() {
-        write("=== Report Khusus Soal Nomor 3 (Stationary & CONN) ===");
+        write("=== Report Stationary & CONN ===");
         write("Total Contacts (CONN events) : " + nrofContacts);
         write("Messages Created             : " + nrofCreated);
         write("Messages Delivered           : " + nrofDelivered);

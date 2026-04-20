@@ -88,8 +88,9 @@ public abstract class ActiveRouter extends MessageRouter {
 		}
 		
 		DTNHost other = con.getOtherNode(getHost());
-		/* do a copy to avoid concurrent modification exceptions 
-		 * (startTransfer may remove messages) */
+		/* do a copy to avoid concurrent modification exceptions
+		 * (startTransfer may remove messages)
+		 */
 		ArrayList<Message> temp = 
 			new ArrayList<Message>(this.getMessageCollection());
 		for (Message m : temp) {
@@ -175,10 +176,11 @@ public abstract class ActiveRouter extends MessageRouter {
 		
 		return retVal;
 	}
-	
+
 	/**
 	 * Makes rudimentary checks (that we have at least one message and one
 	 * connection) about can this router start transfer.
+	 * 
 	 * @return True if router can start transfer, false if not
 	 */
 	protected boolean canStartTransfer() {
@@ -251,7 +253,6 @@ public abstract class ActiveRouter extends MessageRouter {
 			deleteMessage(m.getId(), true);
 			freeBuffer += m.getSize();
 		}
-		
 		return true;
 	}
 	
@@ -281,8 +282,9 @@ public abstract class ActiveRouter extends MessageRouter {
 
 	
 	/**
-	 * Returns the oldest (by receive time) message in the message buffer 
+	 * Returns the oldest (by receive time) message in the message buffer
 	 * (that is not being sent if excludeMsgBeingSent is true).
+	 * 
 	 * @param excludeMsgBeingSent If true, excludes message(s) that are
 	 * being sent from the oldest message check (i.e. if oldest message is
 	 * being sent, the second oldest message is returned)
@@ -298,8 +300,8 @@ public abstract class ActiveRouter extends MessageRouter {
 			if (excludeMsgBeingSent && isSending(m.getId())) {
 				continue; // skip the message(s) that router is sending
 			}
-			
-			if (oldest == null ) {
+
+			if (oldest == null) {
 				oldest = m;
 			}
 			else if (oldest.getReceiveTime() > m.getReceiveTime()) {
@@ -331,10 +333,10 @@ public abstract class ActiveRouter extends MessageRouter {
 				}
 			}
 		}
-		
+
 		return forTuples;
 	}
-	
+
 	/**
 	 * Tries to send messages for the connections that are mentioned
 	 * in the Tuples in the order they are in the list until one of
@@ -364,7 +366,8 @@ public abstract class ActiveRouter extends MessageRouter {
 	  * Goes trough the messages until the other node accepts one
 	  * for receiving (or doesn't accept any). If a transfer is started, the
 	  * connection is included in the list of sending connections.
-	  * @param con Connection trough which the messages are sent
+	 * 
+	 * @param con      Connection trough which the messages are sent
 	  * @param messages A list of messages to try
 	  * @return The message whose transfer was started or null if no 
 	  * transfer was started. 
@@ -396,7 +399,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	 */
 	protected Connection tryMessagesToConnections(List<Message> messages,
 			List<Connection> connections) {
-		for (int i=0, n=connections.size(); i<n; i++) {
+		for (int i = 0, n=connections.size(); i<n; i++) {
 			Connection con = connections.get(i);
 			Message started = tryAllMessages(con, messages); 
 			if (started != null) { 
@@ -516,6 +519,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	/**
 	 * Returns true if this router is currently sending a message with 
 	 * <CODE>msgId</CODE>.
+	 * 
 	 * @param msgId The ID of the message
 	 * @return True if the message is being sent false if not
 	 */
@@ -530,7 +534,7 @@ public abstract class ActiveRouter extends MessageRouter {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks out all sending connections to finalize the ready ones 
 	 * and abort those whose connection went down. Also drops messages
