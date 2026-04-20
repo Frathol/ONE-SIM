@@ -305,11 +305,9 @@ public class ProphetWQueueingPolicy extends UniversalQueueRouter {
 
     @Override
     protected void transferDone(Connection con) {
-        // Logika MOPR: Update FP Value berdasarkan kesuksesan transfer
         Message m = con.getMessage();
         DTNHost other = con.getOtherNode(getHost());
         
-        // Ambil nilai P dari si penerima terhadap tujuan akhir pesan
         double pValue = ((ProphetWQueueingPolicy)other.getRouter()).getPredFor(m.getTo());
         
         double currentFP = getFPValue(m);
