@@ -5,13 +5,14 @@ import java.util.Collection;
 import core.DTNHost;
 import core.Message;
 import core.Settings;
+import core.SimClock;
 
 //Middleware Router untuk menangani berbagai Queueing Policies.
 public class UniversalQueueRouter extends ActiveRouter {
   public static final String QUEUE_POLICY_S = "queuePolicy";
 
   public enum QueuePolicy {
-    FIFO, MOFO, MOPR, SHLI, LEPR
+    FIFO, MOFO, MOPR, SHLI, LEPR, RSHLI
   }
 
   // public static final String POLICY_FIFO = "FIFO";
@@ -53,7 +54,6 @@ public class UniversalQueueRouter extends ActiveRouter {
       Message m = getVictimMessage();
       if (m == null)
         return false;
-
       deleteMessage(m.getId(), true);
       freeBuffer += m.getSize();
     }
@@ -74,8 +74,20 @@ public class UniversalQueueRouter extends ActiveRouter {
       }
 
       switch (currentPolicy) {
+        case FIFO:
+          if (m.getReceiveTime() < victim.getReceiveTime()) {
+            victim = m;
+          }
+          break;
+
         case SHLI: // Shortest Life Time (TTL terendah)
-          if (m.getTtl() < victim.getTtl()) {
+          if (getRemainingTTL(m) < getRemainingTTL(victim)) {
+            victim = m;
+          }
+          break;
+
+        case RSHLI: // Reverse Shortest Life Time (TTL Tinggi)
+          if (m.getTtl() > victim.getTtl()) {
             victim = m;
           }
           break;
@@ -98,7 +110,6 @@ public class UniversalQueueRouter extends ActiveRouter {
           }
           break;
 
-        case FIFO: // First In First Out
         default:
           if (m.getReceiveTime() < victim.getReceiveTime()) {
             victim = m;
@@ -112,6 +123,10 @@ public class UniversalQueueRouter extends ActiveRouter {
   protected double getFPValue(Message m) {
     Object prop = m.getProperty("FP_VALUE");
     return (prop != null) ? (Double) prop : 0.0;
+  }
+
+  protected double getRemainingTTL(Message m) {
+    return m.getTtl() - (SimClock.getTime() - m.getCreationTime());
   }
 
   protected double getPredictabilityToDestination(DTNHost destination) {

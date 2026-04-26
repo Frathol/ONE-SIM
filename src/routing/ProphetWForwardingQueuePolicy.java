@@ -265,36 +265,34 @@ public class ProphetWForwardingQueuePolicy extends UniversalQueueRouter {
    */
   private class TupleComparator implements Comparator<Tuple<Message, Connection>> {
 
-    public int compare(Tuple<Message, Connection> tuple1, Tuple<Message, Connection> tuple2) {
-      DTNHost dest1 = tuple1.getKey().getTo();
-      DTNHost dest2 = tuple2.getKey().getTo();
+    @Override
+    public int compare(Tuple<Message, Connection> t1, Tuple<Message, Connection> t2) {
+      Message m1 = t1.getKey();
+      Message m2 = t2.getKey();
 
-      ProphetWForwardingQueuePolicy r1 = (ProphetWForwardingQueuePolicy) tuple1.getValue().getOtherNode(getHost()).getRouter();
-      ProphetWForwardingQueuePolicy r2 = (ProphetWForwardingQueuePolicy) tuple2.getValue().getOtherNode(getHost()).getRouter();
+      ProphetWForwardingQueuePolicy r1 = (ProphetWForwardingQueuePolicy) t1.getValue().getOtherNode(getHost())
+          .getRouter();
+      ProphetWForwardingQueuePolicy r2 = (ProphetWForwardingQueuePolicy) t2.getValue().getOtherNode(getHost())
+          .getRouter();
 
-      double pB1 = r1.getPredFor(dest1); // P(B,D) untuk pesan 1
-      double pB2 = r2.getPredFor(dest2); // P(B,D) untuk pesan 2
+      double pB1 = r1.getPredFor(m1.getTo());
+      double pB2 = r2.getPredFor(m2.getTo());
 
-      // GRTRMax (Urutkan berdasarkan P lawan tertinggi)
+      int result = 0;
+
+      // Pilih Strategi berdasarkan setting .cfg
       if (currentForwardStrategy.equalsIgnoreCase(STRAT_GRTR_MAX)) {
-        return Double.compare(pB2, pB1);
+        result = Double.compare(pB2, pB1);
+      } else if (currentForwardStrategy.equalsIgnoreCase(STRAT_GRTR_SORT)) {
+        double pA1 = getPredFor(m1.getTo());
+        double pA2 = getPredFor(m2.getTo());
+        result = Double.compare(pB2 - pA2, pB1 - pA1);
       }
-
-      // GRTRSort (Urutkan berdasarkan selisih peningkatan tertinggi)
-      else if (currentForwardStrategy.equalsIgnoreCase(STRAT_GRTR_SORT)) {
-        double pA1 = getPredFor(dest1); // P(A,D) pesan 1
-        double pA2 = getPredFor(dest2); // P(A,D) pesan 2
-
-        double diff1 = pB1 - pA1; // P(B,D) - P(A,D)
-        double diff2 = pB2 - pA2;
-
-        return Double.compare(diff2, diff1);
+      // Jika GRTR, result tetap 0 agar langsung ke tie-breaker
+      if (result == 0) {
+        return compareByQueueMode(m1, m2);
       }
-
-      // GRTR (Tanpa sorting khusus, gunakan FIFO antrean)
-      else {
-        return 0;
-      }
+      return result;
     }
   }
 
