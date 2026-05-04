@@ -105,8 +105,22 @@ public class DecisionEngineRouter extends ActiveRouter {
 
         outgoingMessages = new LinkedList<Tuple<Message, Connection>>();
 
-        decider = (RoutingDecisionEngine) routeSettings.createIntializedObject(
-                "routing." + routeSettings.getSetting(ENGINE_SETTING));
+        // 1. Ambil nama decision engine yang ditulis dari file setting (.cfg)
+        String engineName = routeSettings.getSetting(ENGINE_SETTING);
+        String fullClassName;
+
+        // 2. Evaluasi menggunakan IF: jika nama mengandung/dimulai dengan "community."
+        if (engineName.startsWith("community.")) {
+            // Gabungkan menjadi: "routing.community.BubbleRap"
+            fullClassName = "routing." + engineName;
+        } else {
+            // Jika tidak ada "community.", gunakan folder default bawaan
+            // Gabungkan menjadi: "routing.decisionengine.SnWDecisionEngine"
+            fullClassName = "routing.decisionengine." + engineName;
+        }
+
+        // 3. Muat (load) kelas algoritma berdasarkan path yang sudah difilter di atas
+        decider = (RoutingDecisionEngine) routeSettings.createIntializedObject(fullClassName);
 
         if (routeSettings.contains(TOMBSTONE_SETTING)) {
             tombstoning = routeSettings.getBoolean(TOMBSTONE_SETTING);
@@ -132,7 +146,7 @@ public class DecisionEngineRouter extends ActiveRouter {
         conStates = new HashMap<Connection, Integer>(4);
     }
 
-    //@Override
+    // @Override
     public MessageRouter replicate() {
         return new DecisionEngineRouter(this);
     }
@@ -140,8 +154,8 @@ public class DecisionEngineRouter extends ActiveRouter {
     @Override
     public boolean createNewMessage(Message m) {
         if (decider.newMessage(m)) {
-// if(m.getId().equals("M14"))
-// System.out.println("Host: " + getHost() + "Creating M14");
+            // if(m.getId().equals("M14"))
+            // System.out.println("Host: " + getHost() + "Creating M14");
             makeRoomForNewMessage(m.getSize());
             m.setTtl(this.msgTtl);
             addToMessages(m, true);
@@ -152,74 +166,76 @@ public class DecisionEngineRouter extends ActiveRouter {
         return false;
     }
 
-// @Override
-// public void connectionUp(Connection con)
-// {
-// DTNHost myHost = getHost();
-// DTNHost otherNode = con.getOtherNode(myHost);
-// DecisionEngineRouter otherRouter = (DecisionEngineRouter)otherNode.getRouter();
-//
-// decider.connectionUp(myHost, otherNode);
-//
-/*
-* This part is a little confusing because there's a problem we have to
-* avoid. When a connection comes up, we're assuming here that the two
-* hosts who are now connected will exchange some routing information and
-* update their own based on what the get from the peer. So host A updates
-* its routing table with info from host B, and vice versa. In the real
-* world, A would send its *old* routing information to B and compute new
-* routing information later after receiving B's *old* routing information.
-* In ONE, changedConnection() is called twice, once for each host A and
-* B, in a serial fashion. If it's called for A first, A uses B's old info
-* to compute its new info, but B later uses A's *new* info to compute its
-* new info.... and this can lead to some nasty problems.
-*
-* To combat this, whichever host calls changedConnection() first calls
-* doExchange() once. doExchange() interacts with the DecisionEngine to
-* initiate the exchange of information, and it's assumed that this code
-* will update the information on both peers simultaneously using the old
-* information from both peers.
+    // @Override
+    // public void connectionUp(Connection con)
+    // {
+    // DTNHost myHost = getHost();
+    // DTNHost otherNode = con.getOtherNode(myHost);
+    // DecisionEngineRouter otherRouter =
+    // (DecisionEngineRouter)otherNode.getRouter();
+    //
+    // decider.connectionUp(myHost, otherNode);
+    //
+    /*
+     * This part is a little confusing because there's a problem we have to
+     * avoid. When a connection comes up, we're assuming here that the two
+     * hosts who are now connected will exchange some routing information and
+     * update their own based on what the get from the peer. So host A updates
+     * its routing table with info from host B, and vice versa. In the real
+     * world, A would send its *old* routing information to B and compute new
+     * routing information later after receiving B's *old* routing information.
+     * In ONE, changedConnection() is called twice, once for each host A and
+     * B, in a serial fashion. If it's called for A first, A uses B's old info
+     * to compute its new info, but B later uses A's *new* info to compute its
+     * new info.... and this can lead to some nasty problems.
+     *
+     * To combat this, whichever host calls changedConnection() first calls
+     * doExchange() once. doExchange() interacts with the DecisionEngine to
+     * initiate the exchange of information, and it's assumed that this code
+     * will update the information on both peers simultaneously using the old
+     * information from both peers.
      */
-// if(shouldNotifyPeer(con))
-// {
-// this.doExchange(con, otherNode);
-// otherRouter.didExchange(con);
-// }
+    // if(shouldNotifyPeer(con))
+    // {
+    // this.doExchange(con, otherNode);
+    // otherRouter.didExchange(con);
+    // }
 
     /*
-* Once we have new information computed for the peer, we figure out if
-* there are any messages that should get sent to this peer.
+     * Once we have new information computed for the peer, we figure out if
+     * there are any messages that should get sent to this peer.
      */
-// Collection<Message> msgs = getMessageCollection();
-// for(Message m : msgs)
-// {
-// if(decider.shouldSendMessageToHost(m, otherNode))
-// outgoingMessages.add(new Tuple<Message,Connection>(m, con));
-// }
-// }
-// @Override
-// public void connectionDown(Connection con)
-// {
-// DTNHost myHost = getHost();
-// DTNHost otherNode = con.getOtherNode(myHost);
-// //DecisionEngineRouter otherRouter = (DecisionEngineRouter)otherNode.getRouter();
-//
-// decider.connectionDown(myHost, otherNode);
-//
-// conStates.remove(con);
-//
-// /*
-// * If we  were trying to send message to this peer, we need to remove them
-// * from the outgoing List.
-// */
-// for(Iterator<Tuple<Message,Connection>> i = outgoingMessages.iterator();
-// i.hasNext();)
-// {
-// Tuple<Message, Connection> t = i.next();
-// if(t.getValue() == con)
-// i.remove();
-// }
-// }
+    // Collection<Message> msgs = getMessageCollection();
+    // for(Message m : msgs)
+    // {
+    // if(decider.shouldSendMessageToHost(m, otherNode))
+    // outgoingMessages.add(new Tuple<Message,Connection>(m, con));
+    // }
+    // }
+    // @Override
+    // public void connectionDown(Connection con)
+    // {
+    // DTNHost myHost = getHost();
+    // DTNHost otherNode = con.getOtherNode(myHost);
+    // //DecisionEngineRouter otherRouter =
+    // (DecisionEngineRouter)otherNode.getRouter();
+    //
+    // decider.connectionDown(myHost, otherNode);
+    //
+    // conStates.remove(con);
+    //
+    // /*
+    // * If we were trying to send message to this peer, we need to remove them
+    // * from the outgoing List.
+    // */
+    // for(Iterator<Tuple<Message,Connection>> i = outgoingMessages.iterator();
+    // i.hasNext();)
+    // {
+    // Tuple<Message, Connection> t = i.next();
+    // if(t.getValue() == con)
+    // i.remove();
+    // }
+    // }
     @Override
     public void changedConnection(Connection con) {
         DTNHost myHost = getHost();
@@ -229,23 +245,23 @@ public class DecisionEngineRouter extends ActiveRouter {
             decider.connectionUp(myHost, otherNode);
 
             /*
-* This part is a little confusing because there's a problem we have to
-* avoid. When a connection comes up, we're assuming here that the two
-* hosts who are now connected will exchange some routing information and
-* update their own based on what the get from the peer. So host A updates
-* its routing table with info from host B, and vice versa. In the real
-* world, A would send its *old* routing information to B and compute new
-* routing information later after receiving B's *old* routing information.
-* In ONE, changedConnection() is called twice, once for each host A and
-* B, in a serial fashion. If it's called for A first, A uses B's old info
-* to compute its new info, but B later uses A's *new* info to compute its
-* new info.... and this can lead to some nasty problems.
-*
-* To combat this, whichever host calls changedConnection() first calls
-* doExchange() once. doExchange() interacts with the DecisionEngine to
-* initiate the exchange of information, and it's assumed that this code
-* will update the information on both peers simultaneously using the old
-* information from both peers.
+             * This part is a little confusing because there's a problem we have to
+             * avoid. When a connection comes up, we're assuming here that the two
+             * hosts who are now connected will exchange some routing information and
+             * update their own based on what the get from the peer. So host A updates
+             * its routing table with info from host B, and vice versa. In the real
+             * world, A would send its *old* routing information to B and compute new
+             * routing information later after receiving B's *old* routing information.
+             * In ONE, changedConnection() is called twice, once for each host A and
+             * B, in a serial fashion. If it's called for A first, A uses B's old info
+             * to compute its new info, but B later uses A's *new* info to compute its
+             * new info.... and this can lead to some nasty problems.
+             *
+             * To combat this, whichever host calls changedConnection() first calls
+             * doExchange() once. doExchange() interacts with the DecisionEngine to
+             * initiate the exchange of information, and it's assumed that this code
+             * will update the information on both peers simultaneously using the old
+             * information from both peers.
              */
             if (shouldNotifyPeer(con)) {
                 this.doExchange(con, otherNode);
@@ -253,8 +269,8 @@ public class DecisionEngineRouter extends ActiveRouter {
             }
 
             /*
-* Once we have new information computed for the peer, we figure out if
-* there are any messages that should get sent to this peer.
+             * Once we have new information computed for the peer, we figure out if
+             * there are any messages that should get sent to this peer.
              */
             Collection<Message> msgs = getMessageCollection();
             for (Message m : msgs) {
@@ -268,11 +284,10 @@ public class DecisionEngineRouter extends ActiveRouter {
             conStates.remove(con);
 
             /*
-* If we  were trying to send message to this peer, we need to remove them
-* from the outgoing List.
+             * If we were trying to send message to this peer, we need to remove them
+             * from the outgoing List.
              */
-            for (Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator();
-                    i.hasNext();) {
+            for (Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator(); i.hasNext();) {
                 Tuple<Message, Connection> t = i.next();
                 if (t.getValue() == con) {
                     i.remove();
@@ -305,7 +320,7 @@ public class DecisionEngineRouter extends ActiveRouter {
         }
 
         retVal = con.startTransfer(getHost(), m);
-        
+
         if (retVal == RCV_OK) { // started transfer
             addToSendingConnections(con);
         } else if (tombstoning && retVal == DENIED_DELIVERED) {
@@ -314,8 +329,8 @@ public class DecisionEngineRouter extends ActiveRouter {
         } else if (deleteDelivered && (retVal == DENIED_OLD || retVal == DENIED_DELIVERED)
                 && decider.shouldDeleteOldMessage(m, con.getOtherNode(getHost()))) {
             /* final recipient has already received the msg -> delete it */
-// if(m.getId().equals("M14"))
-// System.out.println("Host: " + getHost() + " told to delete M14");
+            // if(m.getId().equals("M14"))
+            // System.out.println("Host: " + getHost() + " told to delete M14");
             this.deleteMessage(m.getId(), false);
         }
 
@@ -344,8 +359,8 @@ public class DecisionEngineRouter extends ActiveRouter {
 
         Message outgoing = incoming;
         for (Application app : getApplications(incoming.getAppID())) {
-// Note that the order of applications is significant
-// since the next one gets the output of the previous.
+            // Note that the order of applications is significant
+            // since the next one gets the output of the previous.
             outgoing = app.handle(outgoing, getHost());
             if (outgoing == null) {
                 break; // Some app wanted to drop the message
@@ -359,11 +374,11 @@ public class DecisionEngineRouter extends ActiveRouter {
                 && !isDeliveredMessage(aMessage);
 
         if (outgoing != null && decider.shouldSaveReceivedMessage(aMessage, getHost())) {
-// not the final recipient and app doesn't want to drop the message
-// -> put to buffer
+            // not the final recipient and app doesn't want to drop the message
+            // -> put to buffer
             addToMessages(aMessage, false);
 
-// Determine any other connections to which to forward a message
+            // Determine any other connections to which to forward a message
             findConnectionsForNewMessage(aMessage, from);
         }
 
@@ -383,8 +398,7 @@ public class DecisionEngineRouter extends ActiveRouter {
     protected void transferDone(Connection con) {
         Message transferred = this.getMessage(con.getMessage().getId());
 
-        for (Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator();
-                i.hasNext();) {
+        for (Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator(); i.hasNext();) {
             Tuple<Message, Connection> t = i.next();
             if (t.getKey().getId().equals(transferred.getId())
                     && t.getValue().equals(con)) {
@@ -394,19 +408,19 @@ public class DecisionEngineRouter extends ActiveRouter {
         }
 
         if (decider.shouldDeleteSentMessage(transferred, con.getOtherNode(getHost()))) {
-// if(transferred.getId().equals("M14"))
-// System.out.println("Host: " + getHost() + " deleting M14 after transfer");
+            // if(transferred.getId().equals("M14"))
+            // System.out.println("Host: " + getHost() + " deleting M14 after transfer");
             this.deleteMessage(transferred.getId(), false);
 
-// for(Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator();
-// i.hasNext();)
-// {
-// Tuple<Message, Connection> t = i.next();
-// if(t.getKey().getId().equals(transferred.getId()))
-// {
-// i.remove();
-// }
-// }
+            // for(Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator();
+            // i.hasNext();)
+            // {
+            // Tuple<Message, Connection> t = i.next();
+            // if(t.getKey().getId().equals(transferred.getId()))
+            // {
+            // i.remove();
+            // }
+            // }
         }
     }
 
@@ -414,8 +428,7 @@ public class DecisionEngineRouter extends ActiveRouter {
     public void deleteMessage(String id, boolean drop) {
         super.deleteMessage(id, drop);
 
-        for (Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator();
-                i.hasNext();) {
+        for (Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator(); i.hasNext();) {
             Tuple<Message, Connection> t = i.next();
             if (t.getKey().getId().equals(id)) {
                 i.remove();
@@ -426,17 +439,16 @@ public class DecisionEngineRouter extends ActiveRouter {
     @Override
     public void update() {
         super.update();
-        
+
         decider.update(getHost());
-        
+
         if (!canStartTransfer() || isTransferring()) {
             return; // nothing to transfer or is currently transferring
         }
 
         tryMessagesForConnected(outgoingMessages);
 
-        for (Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator();
-                i.hasNext();) {
+        for (Iterator<Tuple<Message, Connection>> i = outgoingMessages.iterator(); i.hasNext();) {
             Tuple<Message, Connection> t = i.next();
             if (!this.hasMessage(t.getKey().getId())) {
                 i.remove();
@@ -454,12 +466,13 @@ public class DecisionEngineRouter extends ActiveRouter {
     }
 
     protected void findConnectionsForNewMessage(Message m, DTNHost from) {
-// for(Connection c : getHost())
+        // for(Connection c : getHost())
         for (Connection c : getConnections()) {
             DTNHost other = c.getOtherNode(getHost());
             if (other != from && decider.shouldSendMessageToHost(m, other, this.getHost())) {
-// if(m.getId().equals("M14"))
-// System.out.println("Adding attempt for M14 from: " + getHost() + " to: " + other);
+                // if(m.getId().equals("M14"))
+                // System.out.println("Adding attempt for M14 from: " + getHost() + " to: " +
+                // other);
                 outgoingMessages.add(new Tuple<Message, Connection>(m, c));
             }
         }

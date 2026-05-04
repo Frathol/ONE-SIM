@@ -102,3 +102,91 @@ public class BufferOccupancyPerNodeReportAvg extends Report implements UpdateLis
         super.done();
     }
 }
+
+// package report;
+
+// import java.util.ArrayList;
+// import java.util.List;
+
+// import core.DTNHost;
+// import core.SimClock;
+// import core.UpdateListener;
+
+// /**
+//  * Report untuk memantau seberapa penuh Buffer (dalam persentase) 
+//  * pada setiap node per interval waktu tertentu.
+//  */
+// public class BufferOccupancyReport extends Report implements UpdateListener {
+    
+//     private int interval = 10; // Cek setiap 10 detik
+//     private double lastSave = 0;
+//     private List<DTNHost> hostList;
+    
+//     // Kita langsung mencetak ke file per baris agar tidak boros RAM
+//     // (Tidak perlu HashMap besar jika kita langsung 'write')
+//     private boolean headerPrinted = false;
+
+//     public BufferOccupancyReport() {
+//         super();
+//         init();
+//     }
+
+//     @Override
+//     protected void init() {
+//         super.init();
+//         hostList = new ArrayList<>();
+//         interval = 10; 
+//         lastSave = 0;
+//         headerPrinted = false;
+//     }
+
+//     @Override
+//     public void updated(List<DTNHost> hosts) {
+//         // Ambil daftar host pada detik pertama
+//         if (hostList.isEmpty()) {
+//             hostList.addAll(hosts);
+//         }
+
+//         // Cek apakah sudah waktunya mencatat (melewati interval)
+//         if (SimClock.getTime() - lastSave >= interval) {
+//             lastSave = SimClock.getTime();
+
+//             // Cetak Header satu kali saja
+//             if (!headerPrinted) {
+//                 printHeader();
+//                 headerPrinted = true;
+//             }
+
+//             // Mulai bangun baris teks untuk detik ini
+//             StringBuilder row = new StringBuilder();
+//             row.append(String.format("%-10d", (int) lastSave));
+
+//             // Patroli ke semua host, intip buffernya
+//             for (DTNHost h : hostList) {
+//                 // getBufferOccupancy() mengembalikan nilai 0.0 (kosong) hingga 100.0 (penuh)
+//                 double occupancy = h.getRouter().getBufferOccupancy();
+//                 row.append(String.format("%-10.2f", occupancy));
+//             }
+
+//             // Tulis baris tersebut ke file txt
+//             write(row.toString());
+//         }
+//     }
+
+//     private void printHeader() {
+//         write("=== PERSENTASE KAPASITAS BUFFER PER INTERVAL ===");
+//         StringBuilder header = new StringBuilder();
+//         header.append(String.format("%-10s", "Time(s)"));
+        
+//         for (DTNHost h : hostList) {
+//             header.append(String.format("%-10s", h.toString()));
+//         }
+//         write(header.toString());
+//     }
+
+//     @Override
+//     public void done() {
+//         write("\n=== SIMULASI SELESAI ===");
+//         super.done();
+//     }
+// }

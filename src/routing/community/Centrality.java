@@ -63,5 +63,5 @@ public interface Centrality
 	public Centrality replicate();
 	
 	//Ini tambahanku sementara
-	//public int [] getGlobalArrayCentrality (Map<DTNHost, List<Duration>> connHistory);
+	public int [] getGlobalArrayCentrality (Map<DTNHost, List<Duration>> connHistory);
 }

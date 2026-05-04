@@ -268,4 +268,10 @@ public class CWindowCentrality implements Centrality
 		return new CWindowCentrality(this);
 	}
 
+	@Override
+	public int[] getGlobalArrayCentrality(Map<DTNHost, List<Duration>> connHistory) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'getGlobalArrayCentrality'");
+	}
+
 }

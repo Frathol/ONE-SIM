@@ -157,4 +157,10 @@ public class SWindowCentrality implements Centrality {
     public Centrality replicate() {
         return new SWindowCentrality(this);
     }
+
+    @Override
+    public int[] getGlobalArrayCentrality(Map<DTNHost, List<Duration>> connHistory) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getGlobalArrayCentrality'");
+    }
 }
