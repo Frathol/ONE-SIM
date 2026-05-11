@@ -11,6 +11,8 @@ import gui.playfield.PlayField;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -79,7 +81,10 @@ public class DTNSimGUI extends DTNSimUI {
 		this.eventLogPanel = new EventLogPanel(this);
 		this.infoPanel = new InfoPanel(this);
 		this.main = new MainWindow(this.scen.getName(), world, field,
-			guiControls, infoPanel, eventLogPanel, this);
+				guiControls, infoPanel, eventLogPanel, this);
+
+		this.main.addKeyListener(new PlayfieldKeyHandler());
+		this.main.setFocusable(true);
 
 		scen.addMessageListener(eventLogPanel);
 		scen.addConnectionListener(eventLogPanel);
@@ -139,7 +144,7 @@ public class DTNSimGUI extends DTNSimUI {
 
 		if (!simCancelled) { // NOT cancelled -> leave the GUI running
 			JOptionPane.showMessageDialog(getParentFrame(),
-				"Simulation done");
+					"Simulation done");
 		} else { // was cancelled -> exit immediately
 			System.exit(0);
 		}
@@ -155,21 +160,20 @@ public class DTNSimGUI extends DTNSimUI {
 		String title = e.getClass().getSimpleName() + " (simulation paused)";
 		String msg = e.getMessage();
 		String txt = (msg != null ? msg : "") + " at simtime " +
-			SimClock.getIntTime() + "\n\ncaught at:\n" +
-			e.getStackTrace()[0].toString() +
-			"\nNote that the simulation might be in inconsistent state, " +
-			"continue only with caution.\n\n Show rest of the stack trace?";
+				SimClock.getIntTime() + "\n\ncaught at:\n" +
+				e.getStackTrace()[0].toString() +
+				"\nNote that the simulation might be in inconsistent state, " +
+				"continue only with caution.\n\n Show rest of the stack trace?";
 		// rest of the update cycle that caused the exception is skipped
 		// so the user is warned about the consequences
-
 
 		if (guiControls != null) {
 			guiControls.setPaused(true);
 		}
 
 		int selection = JOptionPane.showOptionDialog(getParentFrame(), txt,
-			title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
-			null, null, null);
+				title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
+				null, null, null);
 
 		if (selection == 0) {
 			txt = "";
@@ -177,10 +181,9 @@ public class DTNSimGUI extends DTNSimUI {
 				txt += trace.toString() + "\n";
 			}
 			JOptionPane.showMessageDialog(getParentFrame(), txt,
-				"stack trace", JOptionPane.INFORMATION_MESSAGE);
+					"stack trace", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
-
 
 	/**
 	 * Closes the program if simulation is done or cancels it.
@@ -201,7 +204,7 @@ public class DTNSimGUI extends DTNSimUI {
 
 		// update only if long enough simTime has passed (and not forced)
 		if (!forcedUpdate && guiUpdateInterval > (SimClock.getTime()
-			- this.lastUpdate)) {
+				- this.lastUpdate)) {
 			return;
 		}
 
@@ -231,7 +234,7 @@ public class DTNSimGUI extends DTNSimUI {
 	private void updateView() {
 		double simTime = SimClock.getTime();
 		this.lastUpdate = simTime;
-		guiControls.setSimTime(simTime); //update time to control panel
+		guiControls.setSimTime(simTime); // update time to control panel
 
 		this.field.updateField();
 	}
@@ -276,9 +279,9 @@ public class DTNSimGUI extends DTNSimUI {
 		double midX, midY;
 
 		midX = sp.getHorizontalScrollBar().getValue() +
-			sp.getViewport().getWidth() / 2;
+				sp.getViewport().getWidth() / 2;
 		midY = sp.getVerticalScrollBar().getValue() +
-			sp.getViewport().getHeight() / 2;
+				sp.getViewport().getHeight() / 2;
 
 		return this.field.getWorldPosition(new Coord(midX, midY));
 	}
@@ -337,7 +340,7 @@ public class DTNSimGUI extends DTNSimUI {
 	 * Handler for playfield's mouse clicks.
 	 */
 	private class PlayfieldMouseHandler extends MouseAdapter implements
-		MouseWheelListener {
+			MouseWheelListener {
 		/**
 		 * If mouse button is clicked, centers view at that location.
 		 */
@@ -349,6 +352,27 @@ public class DTNSimGUI extends DTNSimUI {
 
 		public void mouseWheelMoved(java.awt.event.MouseWheelEvent e) {
 			guiControls.changeZoom(e.getWheelRotation());
+		}
+	}
+
+	/**
+	 * Handler for playfield's keyboard clicks.
+	 */
+	private class PlayfieldKeyHandler extends KeyAdapter {
+		@Override
+		public void keyPressed(KeyEvent e) {
+			char KeyChar = e.getKeyChar();
+			char KeyCode = e.getKeyChar();
+
+			if (KeyChar == '+' || KeyChar == '=' || KeyCode == KeyEvent.VK_PLUS || KeyCode == KeyEvent.VK_PLUS
+					|| KeyCode == KeyEvent.VK_EQUALS) {
+				guiControls.changeZoom(1);
+			} else if (KeyChar == '-' || KeyChar == '_' || KeyCode == KeyEvent.VK_MINUS
+					|| KeyCode == KeyEvent.VK_UNDERSCORE) {
+				guiControls.changeZoom(-1);
+			} else if (KeyChar == 'p' || KeyChar == 'P' || KeyCode == KeyEvent.VK_P) {
+				guiControls.setPaused(!guiControls.isPaused());
+			}
 		}
 	}
 
