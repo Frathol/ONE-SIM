@@ -95,17 +95,17 @@ public class MessageStatsReport extends Report implements MessageListener {
 		}
 
 		// Only count ACK messages as relayed for overhead ratio
-		if (!m.getId().startsWith("ACK_")) {
-			this.nrofRelayed++;
-		}
+		// if (!m.getId().startsWith("ACK_")) {
+		// 	this.nrofRelayed++;
+		// }
 		if (finalTarget) {
 			this.latencies.add(getSimTime() - this.creationTimes.get(m.getId()));
-			// this.nrofDelivered++;
+			this.nrofDelivered++;
 
 			// Only count non-ACK messages as delivered for delivery probability
-			if (!m.getId().startsWith("ACK_")) {
-				this.nrofDelivered++;
-			}
+			// if (!m.getId().startsWith("ACK_")) {
+			// 	this.nrofDelivered++;
+			// }
 			this.hopCounts.add(m.getHops().size() - 1);
 
 			if (m.isResponse()) {
@@ -123,10 +123,10 @@ public class MessageStatsReport extends Report implements MessageListener {
 
 		this.creationTimes.put(m.getId(), getSimTime());
 		// Only count non-ACK messages as delivered for delivery probability
-		// this.nrofCreated++;
-		if(!m.getId().startsWith("ACK_")){
-			this.nrofCreated++;
-		}
+		this.nrofCreated++;
+		// if(!m.getId().startsWith("ACK_")){
+		// 	this.nrofCreated++;
+		// }
 		if (m.getResponseSize() > 0) {
 			this.nrofResponseReqCreated++;
 		}
