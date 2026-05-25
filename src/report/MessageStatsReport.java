@@ -123,9 +123,6 @@ public class MessageStatsReport extends Report implements MessageListener {
 
 		this.creationTimes.put(m.getId(), getSimTime());
 		// Only count non-ACK messages as delivered for delivery probability
-		// if (!m.getId().startsWith("ACK_")) {
-		// 	this.nrofDelivered++;
-		// }
 		// this.nrofCreated++;
 		if(!m.getId().startsWith("ACK_")){
 			this.nrofCreated++;
