@@ -5,20 +5,15 @@ import core.DTNHost;
 import core.Message;
 import core.MessageListener;
 
-/**
- * Custom Report untuk melacak jalur rute (Routing Path) dan jumlah Hop.
- * Hanya mencatat pesan yang sukses sampai ke final destination.
- */
 public class MessagePathReport extends Report implements MessageListener {
 
   public MessagePathReport() {
-    init(); // Memanggil inisialisasi file saat objek dibuat
+    init();
   }
 
   @Override
   protected void init() {
     super.init();
-    // Mencetak Header Tabel di baris pertama file CSV/TXT
     write("=== MESSAGE PATH TRACER REPORT ===");
     write(String.format("%-15s %-15s %-10s %s", "SimTime", "MessageID", "HopCount", "RoutingPath"));
   }
