@@ -9,8 +9,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import core.Connection;
 import core.DTNHost;
@@ -55,6 +57,18 @@ public class ProphetRouter extends ActiveRouter {
 	private Map<DTNHost, Double> preds;
 	/** last delivery predictability update (sim)time */
 	private double lastAgeUpdate;
+
+	// For EventDatasetReport
+	private Set<DTNHost> neighbor_nodes;
+
+	// For Selected_Forwarder on event dataset report
+	private DTNHost selected_forwarder;
+
+	// For Prediction of current host on event dataset report
+	private double pred_current_host;
+
+	//FOr Prediction of destination host on event dataset report
+	private double pred_dest_host;
 	
 	/**
 	 * Constructor. Creates a new message router based on the settings in
@@ -73,6 +87,8 @@ public class ProphetRouter extends ActiveRouter {
 		}
 
 		initPreds();
+		/* initialize neighbor set so changedConnection can add/remove safely */
+		this.neighbor_nodes = new HashSet<DTNHost>();
 	}
 
 	/**
@@ -83,6 +99,10 @@ public class ProphetRouter extends ActiveRouter {
 		super(r);
 		this.secondsInTimeUnit = r.secondsInTimeUnit;
 		this.beta = r.beta;
+		this.neighbor_nodes = new HashSet<>();
+		this.selected_forwarder = r.selected_forwarder;
+		this.pred_current_host = r.pred_current_host;
+		this.pred_dest_host = r.pred_dest_host;
 		initPreds();
 	}
 	
@@ -99,6 +119,10 @@ public class ProphetRouter extends ActiveRouter {
 			DTNHost otherHost = con.getOtherNode(getHost());
 			updateDeliveryPredFor(otherHost);
 			updateTransitivePreds(otherHost);
+			this.neighbor_nodes.add(otherHost);
+		}else{
+			DTNHost otherHost = con.getOtherNode(getHost());
+			this.neighbor_nodes.remove(otherHost);
 		}
 	}
 	
@@ -122,6 +146,7 @@ public class ProphetRouter extends ActiveRouter {
 	public double getPredFor(DTNHost host) {
 		ageDeliveryPreds(); // make sure preds are updated before getting
 		if (preds.containsKey(host)) {
+			this.pred_current_host = preds.get(host);
 			return preds.get(host);
 		}
 		else {
@@ -230,6 +255,9 @@ public class ProphetRouter extends ActiveRouter {
 				if (othRouter.getPredFor(m.getTo()) > getPredFor(m.getTo())) {
 					// the other node has higher probability of delivery
 					messages.add(new Tuple<Message, Connection>(m,con));
+					// this.neighbor_nodes = getNeighborNodes(other);
+					this.selected_forwarder = othRouter.getHost();
+					this.pred_dest_host = othRouter.getPredFor(m.getTo());
 				}
 			}			
 		}
@@ -275,7 +303,23 @@ public class ProphetRouter extends ActiveRouter {
 			}
 		}
 	}
+
+	public Set<DTNHost> getNeighborNodes(){
+		return this.neighbor_nodes;
+	}
+
+	public DTNHost getSelectedForwarder() {
+		return this.selected_forwarder;
+	}
+
+	public double getPredCurrentHost() {
+		return this.pred_current_host;
+	}
 	
+	public double getPredDestHost() {
+		return this.pred_dest_host;
+	}
+
 	@Override
 	public RoutingInfo getRoutingInfo() {
 		ageDeliveryPreds();
